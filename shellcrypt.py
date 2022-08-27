@@ -1,4 +1,6 @@
-# Shellcraft - 
+# Shellcraft
+# A QoL tool to obfuscate shellcode. 
+# In the future will be able to chain encoding/encryption/compression methods.
 # ~ @0xLegacyy (Jordan Jay)
 import argparse
 from colorama import Fore, Back, Style
