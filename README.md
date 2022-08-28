@@ -1,23 +1,66 @@
 # Shellcrypt
 
-A QoL tool to obfuscate shellcode. In the future will be able to chain encoding/encryption/compression methods.
+A quality of life tool to obfuscate a given shellcode file and output in a useful format for pasting directly into your source code.
 
-(I made this in ~30 minutes so there's a decent amount of TODO's if you want a free commit)
+![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/Ct6DOg2.png)
 
-![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/9KUIcIu.png)
+## Supported Formats
 
-## Usage
+Shellcrypt currently supports the following output formats (more to come in the future!)
 
+- C
+- C#
+- Nim
+
+## Usage 
+**Encrypt shellcode with a random key**
 ```plaintext
-python ./shellcrypt.py [-h] -i INPUT [-k KEY] -f {c} [-o OUTPUT] [-v]
+python ./shellcrypt.py -i ./shellcode.bin -f c
+```
+**Encrypt shellcode with a user-specified key**
+```plaintext
+python ./shellcrypt.py -i ./shellcode.bin -f c -k 6d616c77617265
+```
+**Output in nim format**
+```plaintext
+python ./shellcrypt.py -i ./shellcode.bin -f nim
+```
+**Output to file**
+```plaintext
+python ./shellcrypt.py -i ./shellcode.bin -f nim -o ./shellcode_out.nim
+```
+**Help**
+```plaintext
+███████╗██╗  ██╗███████╗██╗     ██╗      ██████╗██████╗ ██╗   ██╗██████╗ ████████╗
+██╔════╝██║  ██║██╔════╝██║     ██║     ██╔════╝██╔══██╗╚██╗ ██╔╝██╔══██╗╚══██╔══╝
+███████╗███████║█████╗  ██║     ██║     ██║     ██████╔╝ ╚████╔╝ ██████╔╝   ██║
+╚════██║██╔══██║██╔══╝  ██║     ██║     ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║
+███████║██║  ██║███████╗███████╗███████╗╚██████╗██║  ██║   ██║   ██║        ██║
+╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝
 
-optional arguments:
+
+ ~ @0xLegacyy (Jordan Jay)
+
+python ./shellcrypt.py [-h] [-i INPUT] [-k KEY] [-f FORMAT] [--formats] [-o OUTPUT] [-v]
+
+options:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Path to file to be encrypted.
   -k KEY, --key KEY     Encryption key in hex format, default (random 8 bytes).
-  -f {c}, --format {c}  Output format, specify --formats for a list of formats.
+  -f FORMAT, --format FORMAT
+                        Output format, specify --formats for a list of formats.
+  --formats             Show a list of valid formats
   -o OUTPUT, --output OUTPUT
                         Path to output file
   -v, --version         Shows the version and exits
 ```
+
+## Future Development Goals
+
+1. More output formats
+2. More encryption methods
+3. Compression methods
+4. Create a config system that allows for chaining encryption/encoding/compression methods
+
+_**pssst** this is still heavily in development so if you'd like to contribute, have a go at working on one of the many `TODO`'s in the code :)_
