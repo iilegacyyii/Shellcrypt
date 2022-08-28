@@ -1,6 +1,6 @@
 # Shellcrypt
 
-A quality of life tool to obfuscate a given shellcode file and output in a useful format for pasting directly into your source code.
+A single-file cross-platform quality of life tool to obfuscate a given shellcode file and output in a useful format for pasting directly into your source code.
 
 ![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/Ct6DOg2.png)
 
