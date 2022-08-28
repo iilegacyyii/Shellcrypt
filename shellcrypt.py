@@ -35,7 +35,7 @@ def show_banner():
 
 class Log(object):
     def __init__(self):
-        super(Banner, self).__init__()
+        super(Log, self).__init__()
         return
     
     def logSuccess(msg):
