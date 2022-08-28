@@ -13,12 +13,21 @@ from os.path import isfile
 from random import choices
 from string import hexdigits
 
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
 # global vars
 VERSION = "v1.0 beta"
 OUTPUT_FORMATS = [
     "c",
     "csharp",
     "nim"
+]
+
+# Let's just keep it at AES-128 for now
+CIPHERS = [
+    "xor",
+    "aes"
 ]
 
 
@@ -162,8 +171,30 @@ class ShellcodeFormatter(object):
         # Pass execution to the respective handler and return
         return self.__format_handlers[output_format](arrays)
 
+class Encrypt:
+    """Consolidates encryption into a single class"""
+    def __init__(self, cipher:str, key:bytes):
+        self.cipher = cipher
+        self.key = key
 
+    def encrypt(self, plaintext: bytes):
+        """Encrypts plaintext with the cipher that the object was initialized with"""
+        if self.cipher == "xor":
+            return self.__xor(plaintext)
+        elif self.cipher == "aes":
+            return self.__aes_128(plaintext)
 
+    def __xor(self, plaintext: bytes):
+        """Encrypts the input plaintext with a repeating XOR key"""
+        return bytearray(a ^ b for (a, b) in zip(plaintext, cycle(self.key)))
+
+    # TODO: Support specified IV and other modes. 
+    #       Currently just ECB, and other modes are probably stealthier.
+    def __aes_128(self, plaintext: bytes):
+        """Encrypts the input plaintext with AES-128 in ECB mode."""
+        aes_cipher = AES.new(self.key, AES.MODE_ECB)
+        plaintext = pad(plaintext, 16)
+        return aes_cipher.encrypt(plaintext)
 
 if __name__ == "__main__":
     # --------- Initialisation ---------
@@ -177,10 +208,11 @@ if __name__ == "__main__":
     # Parse arguments
     argparser = argparse.ArgumentParser(prog="shellcrypt")
     argparser.add_argument("-i", "--input", help="Path to file to be encrypted.")
-    #argparser.add_argument("-e", "--encrypt", default="xor", help="Encryption method to use, default 'xor'.")
+    argparser.add_argument("-e", "--encrypt", default="xor", help="Encryption method to use, default 'xor'.")
     argparser.add_argument("-k", "--key", help="Encryption key in hex format, default (random 8 bytes).")
     argparser.add_argument("-f", "--format", help="Output format, specify --formats for a list of formats.")
     argparser.add_argument("--formats", action="store_true", help="Show a list of valid formats")
+    argparser.add_argument("--ciphers", action="store_true", help="Show a list of valid ciphers")
     argparser.add_argument("-o", "--output", help="Path to output file")
     argparser.add_argument("-v", "--version", action="store_true", help="Shows the version and exits")
     args = argparser.parse_args()
@@ -190,6 +222,13 @@ if __name__ == "__main__":
     if args.formats:
         print("The following formats are available:")
         for i in OUTPUT_FORMATS:
+            print(f" - {i}")
+        exit()
+
+    # If ciphers specified
+    if args.ciphers:
+        print("The following ciphers are available:")
+        for i in CIPHERS:
             print(f" - {i}")
         exit()
 
@@ -222,14 +261,24 @@ if __name__ == "__main__":
     
     Log.logSuccess(f"Output format: {args.format}")
 
+    # Check encrypt is specified
+    if args.encrypt not in CIPHERS:
+        Log.logError("Invalid cipher specified, please specify a valid cipher e.g. -e xor (--ciphers gives a list of valid ciphers) ") 
+        exit()
+    
+    Log.logSuccess(f"Output format: {args.encrypt}")
+
     # Check if key is specified.
     # if so => validate and store in key
     # else => generate and store in key
     if args.key is None:
-        key = urandom(8)
+        key = urandom(16)   # changed from 8 to 16 to make AES support easier :)
     else:
         if len(args.key) < 2 or len(args.key) % 1 == 1:
             Log.logError(f"Key must be valid byte(s) in hex format (e.g. 4141).")
+            exit()
+        if args.encrypt == "aes" and len(args.key) != 32:
+            Log.logError(f"AES-128 key must be exactly 16 bytes long.")
             exit()
         for i in args.key:
             if i not in hexdigits:
@@ -253,7 +302,9 @@ if __name__ == "__main__":
     #Log.logInfo(f"Encrypting {len(input_bytes)} bytes") (came up with a better idea, keeping for future reminder)
     Log.logDebug(f"Encrypting input file")
 
-    input_bytes  = bytearray(a ^ b for (a, b) in zip(input_bytes, cycle(key)))
+    #input_bytes  = bytearray(a ^ b for (a, b) in zip(input_bytes, cycle(key)))
+    cryptor = Encrypt(cipher=args.encrypt, key=key)
+    input_bytes = cryptor.encrypt(input_bytes)
     input_length = len(input_bytes)
 
     Log.logSuccess(f"Successfully encrypted input file ({len(input_bytes)} bytes)")
