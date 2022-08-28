@@ -41,16 +41,19 @@ python ./shellcrypt.py -i ./shellcode.bin -f nim -o ./shellcode_out.nim
 
  ~ @0xLegacyy (Jordan Jay)
 
-python ./shellcrypt.py [-h] [-i INPUT] [-k KEY] [-f FORMAT] [--formats] [-o OUTPUT] [-v]
+usage: shellcrypt [-h] [-i INPUT] [-e ENCRYPT] [-k KEY] [-f FORMAT] [--formats] [--ciphers] [-o OUTPUT] [-v]
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Path to file to be encrypted.
+  -e ENCRYPT, --encrypt ENCRYPT
+                        Encryption method to use, default 'xor'.
   -k KEY, --key KEY     Encryption key in hex format, default (random 8 bytes).
   -f FORMAT, --format FORMAT
                         Output format, specify --formats for a list of formats.
   --formats             Show a list of valid formats
+  --ciphers             Show a list of valid ciphers
   -o OUTPUT, --output OUTPUT
                         Path to output file
   -v, --version         Shows the version and exits
