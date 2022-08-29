@@ -4,6 +4,11 @@ A single-file cross-platform quality of life tool to obfuscate a given shellcode
 
 ![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/ZlIHYu6.png)
 
+## Contributors
+
+These are going here because they deserve it
+- An00bRektn [github](https://github.com/An00bRektn) [twitter](https://twitter.com/An00bRektn)
+
 ## Encryption Methods
 
 Shellcrypt currently supports the following encryption methods (more to come in the future!)
