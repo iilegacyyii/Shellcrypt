@@ -13,12 +13,21 @@ from os.path import isfile
 from random import choices
 from string import hexdigits
 
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
 # global vars
-VERSION = "v1.0 beta"
+VERSION = "v1.2 beta"
 OUTPUT_FORMATS = [
     "c",
     "csharp",
     "nim"
+]
+
+# Let's just keep it at AES-128 for now
+CIPHERS = [
+    "xor",
+    "aes"
 ]
 
 
@@ -31,8 +40,8 @@ def show_banner():
 ╚════██║██╔══██║██╔══╝  ██║     ██║     ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║   
 ███████║██║  ██║███████╗███████╗███████╗╚██████╗██║  ██║   ██║   ██║        ██║   
 ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝   
+{Style.RESET_ALL}{VERSION}
 
-{Style.RESET_ALL}
  ~ @0xLegacyy (Jordan Jay)
 """
     print(banner)
@@ -117,7 +126,7 @@ class ShellcodeFormatter(object):
         # Generate arrays
         output = str()
         for array_name in arrays:
-            output += f"unsigned char key[{len(arrays[array_name])}] = {{\n"
+            output += f"unsigned char {array_name}[{len(arrays[array_name])}] = {{\n"
             output += self.__generate_array_contents(arrays[array_name])
             output += "\n};\n\n"
         
@@ -131,7 +140,7 @@ class ShellcodeFormatter(object):
         # Generate arrays
         output = str()
         for array_name in arrays:
-            output += f"byte[] key = new byte[{len(arrays[array_name])}] {{\n"
+            output += f"byte[] {array_name} = new byte[{len(arrays[array_name])}] {{\n"
             output += self.__generate_array_contents(arrays[array_name])
             output += "\n};\n\n"
         
@@ -156,14 +165,53 @@ class ShellcodeFormatter(object):
         :param shellcode: dictionary containing {"arrayname":array_bytes} pairs
         :return output: string containing formatted shellcode + key(s)
         """
-        # In future, too many formats to be displayed as choices in argparse
-        # so look to do some format validation here, and add a --formats argument
-
         # Pass execution to the respective handler and return
         return self.__format_handlers[output_format](arrays)
 
+class Encrypt:
+    """ Consolidates encryption into a single class. """
+    def __init__(self):
+        super(Encrypt, self).__init__()
+        self.__encryption_handlers = {
+            "xor": self.__xor,
+            "aes": self.__aes_128
+        }
+        return
 
+    def encrypt(self, cipher:str, plaintext:bytearray, key:bytearray, nonce:bytearray = None) -> bytearray:
+        """ Encrypts plaintext with the user-specified cipher.
+            This has been written this way to support chaining of
+            multiple encryption methods in the future.
+        :param cipher: cipher to use, e.g. 'xor'/'aes'
+        :param plaintext: bytearray containing our plaintext
+        :param key: bytearray containing our encryption key
+        :param nonce: bytearray containing nonce for aes etc. 
+                      if none will be generated on the fly
+        :return ciphertext: bytearray containing encrypted plaintext
+        """
+        # If nonce not specified, generate one, otherwise use the specified one.
+        self.nonce = urandom(16) if nonce is None else nonce
+        self.key = key
+        # cipher is already validated (check argument validation section).
+        return self.__encryption_handlers[cipher](plaintext)
 
+    def __xor(self, plaintext:bytearray) -> bytearray:
+        """ Private method to encrypt the input plaintext with a repeating XOR key.
+        :param plaintext: bytearray containing our plaintext
+        :return ciphertext: bytearray containing encrypted plaintext
+        """
+        return bytearray(a ^ b for (a, b) in zip(plaintext, cycle(self.key)))
+
+    # TODO: Support other modes. 
+    #       Currently just CBC.
+    def __aes_128(self, plaintext:bytearray) -> bytearray:
+        """ Private method to encrypt the input plaintext with AES-128 in CBC mode.
+        :param plaintext: bytearray containing plaintext
+        :return ciphertext: bytearray containing encrypted plaintext
+        """
+        aes_cipher = AES.new(self.key, AES.MODE_CBC, self.nonce)
+        plaintext = pad(plaintext, 16)
+        return aes_cipher.encrypt(plaintext)
 
 if __name__ == "__main__":
     # --------- Initialisation ---------
@@ -177,10 +225,12 @@ if __name__ == "__main__":
     # Parse arguments
     argparser = argparse.ArgumentParser(prog="shellcrypt")
     argparser.add_argument("-i", "--input", help="Path to file to be encrypted.")
-    #argparser.add_argument("-e", "--encrypt", default="xor", help="Encryption method to use, default 'xor'.")
-    argparser.add_argument("-k", "--key", help="Encryption key in hex format, default (random 8 bytes).")
+    argparser.add_argument("-e", "--encrypt", default="xor", help="Encryption method to use, default 'xor'.")
+    argparser.add_argument("-k", "--key", help="Encryption key in hex format, default (random 16 bytes).")
+    argparser.add_argument("-n", "--nonce", help="Encryption nonce in hex format, default (random 16 bytes).")
     argparser.add_argument("-f", "--format", help="Output format, specify --formats for a list of formats.")
     argparser.add_argument("--formats", action="store_true", help="Show a list of valid formats")
+    argparser.add_argument("--ciphers", action="store_true", help="Show a list of valid ciphers")
     argparser.add_argument("-o", "--output", help="Path to output file")
     argparser.add_argument("-v", "--version", action="store_true", help="Shows the version and exits")
     args = argparser.parse_args()
@@ -190,6 +240,13 @@ if __name__ == "__main__":
     if args.formats:
         print("The following formats are available:")
         for i in OUTPUT_FORMATS:
+            print(f" - {i}")
+        exit()
+
+    # If ciphers specified
+    if args.ciphers:
+        print("The following ciphers are available:")
+        for i in CIPHERS:
             print(f" - {i}")
         exit()
 
@@ -203,7 +260,7 @@ if __name__ == "__main__":
 
     # Check input file is specified
     if args.input is None:
-        Log.logError("Must specify an input file e.g. -i .\shellcode.bin (specify --help for more info)")
+        Log.logError("Must specify an input file e.g. -i shellcode.bin (specify --help for more info)")
         exit()
 
     # Check input file exists
@@ -222,25 +279,54 @@ if __name__ == "__main__":
     
     Log.logSuccess(f"Output format: {args.format}")
 
+    # Check encrypt is specified
+    if args.encrypt not in CIPHERS:
+        Log.logError("Invalid cipher specified, please specify a valid cipher e.g. -e xor (--ciphers gives a list of valid ciphers) ") 
+        exit()
+    
+    Log.logSuccess(f"Output format: {args.encrypt}")
+
     # Check if key is specified.
     # if so => validate and store in key
     # else => generate and store in key
     if args.key is None:
-        key = urandom(8)
+        key = urandom(16) # Changed from 8 to 16 to make AES support easier :)
     else:
-        if len(args.key) < 2 or len(args.key) % 1 == 1:
-            Log.logError(f"Key must be valid byte(s) in hex format (e.g. 4141).")
+        if len(args.key) < 2 or len(args.key) % 2 == 1:
+            Log.logError("Key must be valid byte(s) in hex format (e.g. 4141).")
+            exit()
+        if args.encrypt == "aes" and len(args.key) != 32:
+            Log.logError("AES-128 key must be exactly 16 bytes long.")
             exit()
         for i in args.key:
             if i not in hexdigits:
-                Log.logError(f"Key must be valid byte(s) in hex format (e.g. 4141).")
+                Log.logError("Key must be valid byte(s) in hex format (e.g. 4141).")
                 exit()
         
         key = bytearray.fromhex(args.key)
     
     Log.logSuccess(f"Using key: {hexlify(key).decode()}")
     
-    # TODO: more validation when more args are used
+    # TODO: somehow join the above and this as it's a lot of repeated code,
+    #       maybe some kind of method for checking if an input is hex and 16 bytes ? 
+    # Validate the user's nonce if one is specified, else generate one
+    if args.nonce is None:
+        nonce = urandom(16)
+    else:
+        if len(args.nonce) != 32:
+            Log.logError("Nonce must be exactly 16 bytes long")
+            exit()
+        for i in args.nonce:
+            if i not in hexdigits:
+                Log.logError("Nonce must be 16 valid bytes in hex format (e.g. 7468697369736d616c6963696f757321)")
+                exit()
+    
+        nonce = bytearray.fromhex(args.nonce)
+    
+    # Only show nonce if it's used, could be confusing to the user otherwise
+    # TODO: probably change this in the future to if args.encrypt in requires_nonce => show
+    if args.encrypt == "aes":
+        Log.logSuccess(f"Using nonce: {hexlify(nonce).decode()}")
 
     Log.logDebug("Arguments validated")
 
@@ -253,7 +339,9 @@ if __name__ == "__main__":
     #Log.logInfo(f"Encrypting {len(input_bytes)} bytes") (came up with a better idea, keeping for future reminder)
     Log.logDebug(f"Encrypting input file")
 
-    input_bytes  = bytearray(a ^ b for (a, b) in zip(input_bytes, cycle(key)))
+    #input_bytes  = bytearray(a ^ b for (a, b) in zip(input_bytes, cycle(key)))
+    cryptor = Encrypt()
+    input_bytes = cryptor.encrypt(args.encrypt, input_bytes, key, nonce)
     input_length = len(input_bytes)
 
     Log.logSuccess(f"Successfully encrypted input file ({len(input_bytes)} bytes)")
@@ -263,9 +351,15 @@ if __name__ == "__main__":
     # TODO: have `arrays` dict be generated by the encryption method(s) in use
     #       as only XOR is supported, this is fine for now.
     arrays = {
-        "key":key,
-        "sh3llc0d3":input_bytes
+        "key":key
     }
+
+    # If aes in use, add nonce to the arrays
+    if args.encrypt == "aes":
+        arrays["nonce"] = nonce
+    
+    # Removed from the initialization line(s) for arrays for nicer output ordering.
+    arrays["sh3llc0d3"] = input_bytes
 
     # Generate formatted output.
     shellcode_formatter = ShellcodeFormatter()

@@ -2,7 +2,14 @@
 
 A single-file cross-platform quality of life tool to obfuscate a given shellcode file and output in a useful format for pasting directly into your source code.
 
-![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/Ct6DOg2.png)
+![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/ZlIHYu6.png)
+
+## Encryption Methods
+
+Shellcrypt currently supports the following encryption methods (more to come in the future!)
+
+- XOR
+- AES (CBC)
 
 ## Supported Formats
 
@@ -17,6 +24,10 @@ Shellcrypt currently supports the following output formats (more to come in the 
 ```plaintext
 python ./shellcrypt.py -i ./shellcode.bin -f c
 ```
+**Encrypt shellcode with AES CBC**
+```plaintext
+python ./shellcrypt.py -i ./shellcode.bin -e aes -f c
+```
 **Encrypt shellcode with a user-specified key**
 ```plaintext
 python ./shellcrypt.py -i ./shellcode.bin -f c -k 6d616c77617265
@@ -29,6 +40,14 @@ python ./shellcrypt.py -i ./shellcode.bin -f nim
 ```plaintext
 python ./shellcrypt.py -i ./shellcode.bin -f nim -o ./shellcode_out.nim
 ```
+**Get a list of encryption methods**
+```plaintext
+python ./shellcrypt.py --ciphers
+```
+**Get a list of output formats**
+```plaintext
+python ./shellcrypt.py --formats
+```
 **Help**
 ```plaintext
 ███████╗██╗  ██╗███████╗██╗     ██╗      ██████╗██████╗ ██╗   ██╗██████╗ ████████╗
@@ -37,20 +56,25 @@ python ./shellcrypt.py -i ./shellcode.bin -f nim -o ./shellcode_out.nim
 ╚════██║██╔══██║██╔══╝  ██║     ██║     ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║
 ███████║██║  ██║███████╗███████╗███████╗╚██████╗██║  ██║   ██║   ██║        ██║
 ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝
-
+v1.2 beta
 
  ~ @0xLegacyy (Jordan Jay)
 
-python ./shellcrypt.py [-h] [-i INPUT] [-k KEY] [-f FORMAT] [--formats] [-o OUTPUT] [-v]
+usage: shellcrypt [-h] [-i INPUT] [-e ENCRYPT] [-k KEY] [-n NONCE] [-f FORMAT] [--formats] [--ciphers] [-o OUTPUT] [-v]
 
 options:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Path to file to be encrypted.
-  -k KEY, --key KEY     Encryption key in hex format, default (random 8 bytes).
+  -e ENCRYPT, --encrypt ENCRYPT
+                        Encryption method to use, default 'xor'.
+  -k KEY, --key KEY     Encryption key in hex format, default (random 16 bytes).
+  -n NONCE, --nonce NONCE
+                        Encryption nonce in hex format, default (random 16 bytes).
   -f FORMAT, --format FORMAT
                         Output format, specify --formats for a list of formats.
   --formats             Show a list of valid formats
+  --ciphers             Show a list of valid ciphers
   -o OUTPUT, --output OUTPUT
                         Path to output file
   -v, --version         Shows the version and exits

@@ -1,0 +1,11 @@
+# Python
+.env
+venv
+env
+**/__pycache__
+**/*.pyc
+**/*.swp
+**/*.egg-info/
+dist/
+build/
+.idea/
