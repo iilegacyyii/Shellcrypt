@@ -91,5 +91,6 @@ options:
 2. More encryption methods
 3. Compression methods
 4. Create a config system that allows for chaining encryption/encoding/compression methods
+5. Flag to add a decrypt method to the generated code
 
 _**pssst** this is still heavily in development so if you'd like to contribute, have a go at working on one of the many `TODO`'s in the code :)_
