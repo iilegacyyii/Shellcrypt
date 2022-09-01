@@ -17,11 +17,12 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 
 # global vars
-VERSION = "v1.2 beta"
+VERSION = "v1.3 beta"
 OUTPUT_FORMATS = [
     "c",
     "csharp",
-    "nim"
+    "nim",
+    "raw"
 ]
 
 # Let's just keep it at AES-128 for now
@@ -98,7 +99,8 @@ class ShellcodeFormatter(object):
         self.__format_handlers = {
             "c":      self.__output_c,
             "csharp": self.__output_csharp,
-            "nim":    self.__output_nim
+            "nim":    self.__output_nim,
+            "raw":    self.__output_raw
         }
         return
     
@@ -159,6 +161,14 @@ class ShellcodeFormatter(object):
             output += "\n]\n\n"
         return output
 
+    def __output_raw(self, arrays:dict) -> str:
+        """ Private method to output shellcode in raw format.
+        :param arrays: dictionary containing array names and their respective bytes
+        :return output: string containing shellcode in raw format
+        """
+        # Grab shellcode
+        return arrays["sh3llc0d3"]
+
     def generate(self, output_format:str, arrays:dict) -> str:
         """ Generates output given the current class configuration
         :param output_format: Output format to generate e.g. "c" or "csharp"
@@ -211,7 +221,7 @@ class Encrypt:
         """
         aes_cipher = AES.new(self.key, AES.MODE_CBC, self.nonce)
         plaintext = pad(plaintext, 16)
-        return aes_cipher.encrypt(plaintext)
+        return bytearray(aes_cipher.encrypt(plaintext))
 
 if __name__ == "__main__":
     # --------- Initialisation ---------
@@ -368,11 +378,15 @@ if __name__ == "__main__":
     # --------- Output ---------
     # If no output file specified.
     if args.output is None:
-        print(output)
+        # We want to decode if it's a bytearray. (for raw mode)
+        print(output.decode("latin1") if isinstance(output, bytearray) else output) 
         exit()
     
     # If output file specified.
-    with open(args.output, "w") as file_handle:
+    Log.logDebug(f"output var type: {type(output)}")
+    write_mode = ("wb" if isinstance(output, bytearray) else "w") # We want wb if it's a bytearray. (for raw mode)
+    Log.logDebug(f"write_mode = \"{write_mode}\"")
+    with open(args.output, write_mode) as file_handle:
         file_handle.write(output)
     
     Log.logSuccess(f"Output written to '{args.output}'")

@@ -14,7 +14,7 @@ These are going here because they deserve it
 Shellcrypt currently supports the following encryption methods (more to come in the future!)
 
 - XOR
-- AES (CBC)
+- AES (128-bit CBC)
 
 ## Supported Formats
 
@@ -23,13 +23,14 @@ Shellcrypt currently supports the following output formats (more to come in the 
 - C
 - C#
 - Nim
+- Raw
 
 ## Usage 
 **Encrypt shellcode with a random key**
 ```plaintext
 python ./shellcrypt.py -i ./shellcode.bin -f c
 ```
-**Encrypt shellcode with AES CBC**
+**Encrypt shellcode with 128-bit AES CBC**
 ```plaintext
 python ./shellcrypt.py -i ./shellcode.bin -e aes -f c
 ```
@@ -61,13 +62,14 @@ python ./shellcrypt.py --formats
 ╚════██║██╔══██║██╔══╝  ██║     ██║     ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║
 ███████║██║  ██║███████╗███████╗███████╗╚██████╗██║  ██║   ██║   ██║        ██║
 ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝
-v1.2 beta
+v1.3 beta
 
  ~ @0xLegacyy (Jordan Jay)
 
-usage: shellcrypt [-h] [-i INPUT] [-e ENCRYPT] [-k KEY] [-n NONCE] [-f FORMAT] [--formats] [--ciphers] [-o OUTPUT] [-v]
+usage: shellcrypt [-h] [-i INPUT] [-e ENCRYPT] [-k KEY] [-n NONCE] [-f FORMAT] [--formats] [--ciphers] [-o OUTPUT]
+                  [-v]
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Path to file to be encrypted.
@@ -87,10 +89,11 @@ options:
 
 ## Future Development Goals
 
-1. More output formats
+1. More output formats (python/go/rust/etc.)
 2. More encryption methods
 3. Compression methods
 4. Create a config system that allows for chaining encryption/encoding/compression methods
 5. Flag to add a decrypt method to the generated code
+6. [Shikata](https://github.com/EgeBalci/sgn) encoder mayhaps?
 
 _**pssst** this is still heavily in development so if you'd like to contribute, have a go at working on one of the many `TODO`'s in the code :)_
