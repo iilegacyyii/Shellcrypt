@@ -22,6 +22,11 @@ OUTPUT_FORMATS = [
     "c",
     "csharp",
     "nim",
+    "go",
+    "py",
+    "ps1",
+    "vba",
+    "vbscript",
     "raw"
 ]
 
@@ -97,27 +102,43 @@ class ShellcodeFormatter(object):
     def __init__(self):
         super(ShellcodeFormatter, self).__init__()
         self.__format_handlers = {
-            "c":      self.__output_c,
-            "csharp": self.__output_csharp,
-            "nim":    self.__output_nim,
-            "raw":    self.__output_raw
+            "c":        self.__output_c,
+            "csharp":   self.__output_csharp,
+            "nim":      self.__output_nim,
+            "go":       self.__output_go,
+            "py":       self.__output_py,
+            "ps1":      self.__output_ps1,
+            "vba":      self.__output_vba,
+            "vbscript": self.__output_vbscript,
+            "raw":      self.__output_raw
         }
         return
     
-    def __generate_array_contents(self, input_bytes:bytearray) -> str:
+    def __generate_array_contents(self, input_bytes:bytearray, string_format:bool=False) -> str:
         """ Takes a byte array, and generates a string in format
             0xaa,0xff,0xab(up to 15),
             0x4f...
         :param input_bytes: bytearray
+        :param string_format: Whether to print in the \xff format or 0xff
         :return: string containing formatted array contents
         """
+        # TODO: Rework this to support more languages than just those that use the 0x format
         output = ""
-        for i in range(len(input_bytes) - 1):
-            if i % 15 == 0:
-                output += "\n\t"
-            output += f"0x{input_bytes[i]:0>2x},"
-        output += f"0x{input_bytes[-1]:0>2x}"
-        return output[1:] # (strip first \n)
+        if not string_format:
+            for i in range(len(input_bytes) - 1):
+                if i % 15 == 0:
+                    output += "\n\t"
+                output += f"0x{input_bytes[i]:0>2x},"
+            output += f"0x{input_bytes[-1]:0>2x}"
+            return output[1:] # (strip first \n)
+        else:
+            for i in range(len(input_bytes) - 1):
+                if i % 15 == 0:
+                    output += "\n"
+                output += f"\\x{input_bytes[i]:0>2x}"
+            output += f"\\x{input_bytes[-1]:0>2x}"
+            return output[1:] # (strip first \n)            
+
 
     def __output_c(self, arrays:dict) -> str:
         """ Private method to output in C format.
@@ -159,6 +180,75 @@ class ShellcodeFormatter(object):
             output += f"var {array_name}: array[{len(arrays[array_name])}, byte] = [\n"
             output += "\tbyte " + self.__generate_array_contents(arrays[array_name])[1:]
             output += "\n]\n\n"
+        return output
+
+    def __output_go(self, arrays:dict) -> str:
+        """ Private method to output in golang format.
+        :param arrays: dictionary containing array names and their respective bytes
+        :return output: string containing shellcode in golang format
+        """
+        # Generate arrays
+        output = str()
+        for array_name in arrays:
+            output += f"{array_name} := []byte{{\n"
+            output += self.__generate_array_contents(arrays[array_name])
+            output += "\n};\n\n"
+        return output
+
+    def __output_py(self, arrays:dict) -> str:
+        """ Private method to output in python format.
+        :param arrays: dictionary containing array names and their respective bytes
+        :return output: string containing shellcode in python format
+        """
+        # Note: Technically not best to use the triple quotes here but consistency ig
+        # Generate arrays
+        output = str()
+        for array_name in arrays:
+            output += f"{array_name} = b\"\"\""
+            output += self.__generate_array_contents(arrays[array_name], string_format=True)
+            output += "\"\"\"\n\n"
+        return output
+
+    def __output_ps1(self, arrays:dict) -> str:
+        """ Private method to output in powershell format.
+        :param arrays: dictionary containing array names and their respective bytes
+        :return output: string containing shellcode in powershell format
+        """
+        # Note: Technically not best to use the triple quotes here but consistency ig
+        # Generate arrays
+        output = str()
+        for array_name in arrays:
+            output += f"[Byte[]] ${array_name} = "
+            output += self.__generate_array_contents(arrays[array_name])[1:]
+            output += "\n\n"
+        return output
+
+    def __output_vba(self, arrays:dict) -> str:
+        """ Private method to output in visual basic application format.
+        :param arrays: dictionary containing array names and their respective bytes
+        :return output: string containing shellcode in visual basic application format
+        """
+        # does not have short line lengths
+        # Generate arrays
+        output = str()
+        for array_name in arrays:
+            output += f"{array_name} = Array("
+            output += "".join([str(c)+"," for c in arrays[array_name]])[:-1]
+            output += ")\n\n"
+        return output
+
+    def __output_vbscript(self, arrays:dict) -> str:
+        """ Private method to output in vbscript format.
+        :param arrays: dictionary containing array names and their respective bytes
+        :return output: string containing shellcode in vbscript format
+        """
+        # does not have short line lengths
+        # Generate arrays
+        output = str()
+        for array_name in arrays:
+            output += f"{array_name}="
+            output += "".join([f"Chr({str(c)})&" for c in arrays[array_name]])[:-1]
+            output += "\n\n"
         return output
 
     def __output_raw(self, arrays:dict) -> str:
@@ -358,8 +448,6 @@ if __name__ == "__main__":
 
     # --------- Output Generation ---------
     # Define array names + content to be formatted
-    # TODO: have `arrays` dict be generated by the encryption method(s) in use
-    #       as only XOR is supported, this is fine for now.
     arrays = {
         "key":key
     }
