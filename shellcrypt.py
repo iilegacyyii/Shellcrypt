@@ -228,13 +228,28 @@ class ShellcodeFormatter(object):
         :param arrays: dictionary containing array names and their respective bytes
         :return output: string containing shellcode in visual basic application format
         """
-        # does not have short line lengths
         # Generate arrays
         output = str()
+        # VBA has a maximum line length of 1023 characters, so have to work around that
         for array_name in arrays:
+            # Array name
             output += f"{array_name} = Array("
-            output += "".join([str(c)+"," for c in arrays[array_name]])[:-1]
-            output += ")\n\n"
+            line_length = len(output)
+            # Array contents
+            array_size = len(arrays[array_name])
+            for i, x in enumerate(arrays[array_name]):
+                if i == array_size - 1:
+                    break
+                # If within 5 bytes, we have enough to write "222,_", which is enough for any value. 
+                if line_length + 5 > 1022:
+                    output += "_\n"
+                    line_length = 0
+                output += f"{x},"
+                line_length += len(f"{x},")
+            # Array end
+            if line_length + 4 > 1023:
+                output += "_\n"
+            output += f"{x})\n\n"
         return output
 
     def __output_vbscript(self, arrays:dict) -> str:
