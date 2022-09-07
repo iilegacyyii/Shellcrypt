@@ -2,12 +2,12 @@
 
 A single-file cross-platform quality of life tool to obfuscate a given shellcode file and output in a useful format for pasting directly into your source code.
 
-![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/ZlIHYu6.png)
+![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/zDOmXE1.png)
 
 ## Contributors
 
 These are going here because they deserve it
-- An00bRektn [github](https://github.com/An00bRektn) [twitter](https://twitter.com/An00bRektn)
+- An00bRektn [github](https://github.com/An00bRektn) [twitter](https://twitter.com/An00bRektn) ♥
 
 ## Encryption Methods
 
@@ -67,7 +67,7 @@ python ./shellcrypt.py --formats
 ╚════██║██╔══██║██╔══╝  ██║     ██║     ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║
 ███████║██║  ██║███████╗███████╗███████╗╚██████╗██║  ██║   ██║   ██║        ██║
 ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝
-v1.3 beta
+v1.4 beta
 
  ~ @0xLegacyy (Jordan Jay)
 
@@ -94,7 +94,7 @@ optional arguments:
 
 ## Future Development Goals
 
-1. More output formats (python/go/rust/etc.)
+1. More output formats (rust etc.)
 2. More encryption methods
 3. Compression methods
 4. Create a config system that allows for chaining encryption/encoding/compression methods
