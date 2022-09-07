@@ -23,6 +23,11 @@ Shellcrypt currently supports the following output formats (more to come in the 
 - C
 - C#
 - Nim
+- Golang
+- Python
+- Powershell
+- Visual Basic for Applications (VBA)
+- Visual Basic Script (VBS)
 - Raw
 
 ## Usage 
