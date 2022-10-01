@@ -17,7 +17,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 
 # global vars
-VERSION = "v1.3 beta"
+VERSION = "v1.4 beta"
 OUTPUT_FORMATS = [
     "c",
     "csharp",
