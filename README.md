@@ -2,7 +2,7 @@
 
 A single-file cross-platform quality of life tool to obfuscate a given shellcode file and output in a useful format for pasting directly into your source code.
 
-![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/zDOmXE1.png)
+![Screenshot of Shellcrypt encrypting shellcode](https://i.imgur.com/DavG7ad.png)
 
 ## Contributors
 
@@ -13,8 +13,11 @@ These are going here because they deserve it
 
 Shellcrypt currently supports the following encryption methods (more to come in the future!)
 
-- XOR
 - AES (128-bit CBC)
+- ChaCha20
+- RC4
+- Salsa20
+- XOR
 
 ## Supported Formats
 
@@ -67,14 +70,14 @@ python ./shellcrypt.py --formats
 ╚════██║██╔══██║██╔══╝  ██║     ██║     ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║
 ███████║██║  ██║███████╗███████╗███████╗╚██████╗██║  ██║   ██║   ██║        ██║
 ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝
-v1.4 beta
+v1.5 beta
 
  ~ @0xLegacyy (Jordan Jay)
 
 usage: shellcrypt [-h] [-i INPUT] [-e ENCRYPT] [-k KEY] [-n NONCE] [-f FORMAT] [--formats] [--ciphers] [-o OUTPUT]
                   [-v]
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Path to file to be encrypted.

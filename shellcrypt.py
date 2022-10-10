@@ -13,11 +13,11 @@ from os.path import isfile
 from random import choices
 from string import hexdigits
 
-from Crypto.Cipher import AES
+from Crypto.Cipher import AES, ARC4, ChaCha20, Salsa20
 from Crypto.Util.Padding import pad
 
 # global vars
-VERSION = "v1.4 beta"
+VERSION = "v1.5 beta"
 OUTPUT_FORMATS = [
     "c",
     "csharp",
@@ -30,10 +30,13 @@ OUTPUT_FORMATS = [
     "raw"
 ]
 
-# Let's just keep it at AES-128 for now
+
 CIPHERS = [
-    "xor",
-    "aes"
+    "aes", # Let's just keep it at AES-128 for now
+    "chacha20",
+    "rc4",
+    "salsa20",
+    "xor"
 ]
 
 
@@ -288,8 +291,11 @@ class Encrypt:
     def __init__(self):
         super(Encrypt, self).__init__()
         self.__encryption_handlers = {
-            "xor": self.__xor,
-            "aes": self.__aes_128
+            "xor":      self.__xor,
+            "aes":      self.__aes_128,
+            "rc4":      self.__rc4,
+            "chacha20": self.__chacha20,
+            "salsa20":  self.__salsa20
         }
         return
 
@@ -327,6 +333,31 @@ class Encrypt:
         aes_cipher = AES.new(self.key, AES.MODE_CBC, self.nonce)
         plaintext = pad(plaintext, 16)
         return bytearray(aes_cipher.encrypt(plaintext))
+    
+    def __rc4(self, plaintext:bytearray) -> bytearray:
+        """ Private method to encrypt the input plaintext via RC4.
+        :param plaintext: bytearray containing plaintext
+        :return ciphertext: bytearray containing encrypted plaintext
+        """
+        rc4_cipher = ARC4.new(self.key)
+        return rc4_cipher.encrypt(plaintext)
+    
+    def __chacha20(self, plaintext:bytearray) -> bytearray:
+        """ Private method to encrypt the input plaintext via ChaCha20.
+        :param plaintext: bytearray containing plaintext
+        :return ciphertext: bytearray containing encrypted plaintext
+        """
+        chacha20_cipher = ChaCha20.new(key=self.key)
+        return chacha20_cipher.encrypt(plaintext) 
+
+    def __salsa20(self, plaintext:bytearray) -> bytearray:
+        """ Private method to encrypt the input plaintext via Salsa20.
+        :param plaintext: bytearray containing plaintext
+        :return ciphertext: bytearray containing encrypted plaintext
+        """
+        salsa20_cipher = Salsa20.new(key=key)
+        return salsa20_cipher.encrypt(plaintext)
+
 
 if __name__ == "__main__":
     # --------- Initialisation ---------
@@ -348,6 +379,9 @@ if __name__ == "__main__":
     argparser.add_argument("--ciphers", action="store_true", help="Show a list of valid ciphers")
     argparser.add_argument("-o", "--output", help="Path to output file")
     argparser.add_argument("-v", "--version", action="store_true", help="Shows the version and exits")
+    # TODO: Add --preserve-null flag for XOR. (Don't XOR null bytes.)
+    # TODO: Add length param for random key, currently locked at 16 bytes.
+    # TODO: Maybe add decryption routines?
     args = argparser.parse_args()
 
     # --------- Info-only arguments ---------
@@ -405,7 +439,7 @@ if __name__ == "__main__":
     # if so => validate and store in key
     # else => generate and store in key
     if args.key is None:
-        key = urandom(16) # Changed from 8 to 16 to make AES support easier :)
+        key = urandom(32) # Changed from 8 to 16 to make AES support easier :)
     else:
         if len(args.key) < 2 or len(args.key) % 2 == 1:
             Log.logError("Key must be valid byte(s) in hex format (e.g. 4141).")
