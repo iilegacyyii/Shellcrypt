@@ -8,6 +8,7 @@ A single-file cross-platform quality of life tool to obfuscate a given shellcode
 
 These are going here because they deserve it
 - An00bRektn [github](https://github.com/An00bRektn) [twitter](https://twitter.com/An00bRektn) ♥
+- 0xtejas [github](https://github.com/0xtejas)
 
 ## Encryption Methods
 
