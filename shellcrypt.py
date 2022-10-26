@@ -169,9 +169,9 @@ class ShellcodeFormatter(object):
         # Generate arrays
         output = str()
         for array_name in arrays:
-            output += f"let {array_name} = ["
-            output += self.__generate_array_contents(arrays[array_name]).strip()
-            output += "];\n\n"
+            output += f"let {array_name}: [u8; {len(arrays[array_name])}] = [\n"
+            output += self.__generate_array_contents(arrays[array_name])
+            output += "\n];\n\n"
         
         return output
     
