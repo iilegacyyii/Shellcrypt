@@ -27,7 +27,8 @@ OUTPUT_FORMATS = [
     "ps1",
     "vba",
     "vbscript",
-    "raw"
+    "raw",
+    "rust"
 ]
 
 
@@ -113,7 +114,8 @@ class ShellcodeFormatter(object):
             "ps1":      self.__output_ps1,
             "vba":      self.__output_vba,
             "vbscript": self.__output_vbscript,
-            "raw":      self.__output_raw
+            "raw":      self.__output_raw,
+            "rust":     self.__output_rust
         }
         return
     
@@ -155,6 +157,21 @@ class ShellcodeFormatter(object):
             output += f"unsigned char {array_name}[{len(arrays[array_name])}] = {{\n"
             output += self.__generate_array_contents(arrays[array_name])
             output += "\n};\n\n"
+        
+        return output
+    
+    def __output_rust(self, arrays:dict) -> str:
+        """ Private method to output in Rust format.
+        :param arrays: dictionary containing array names and their respective bytes
+        :return output: string containing shellcode in rust format, similar
+                        to msfvenom's rust format.
+        """
+        # Generate arrays
+        output = str()
+        for array_name in arrays:
+            output += f"let {array_name}: [u8; {len(arrays[array_name])}] = [\n"
+            output += self.__generate_array_contents(arrays[array_name])
+            output += "\n];\n\n"
         
         return output
     
