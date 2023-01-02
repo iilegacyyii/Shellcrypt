@@ -32,6 +32,7 @@ Shellcrypt currently supports the following output formats (more to come in the 
 - Powershell
 - Visual Basic for Applications (VBA)
 - Visual Basic Script (VBS)
+- Rust
 - Raw
 
 ## Usage 
