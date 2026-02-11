@@ -37,14 +37,15 @@ class ShellcodeFormatter:
                     output += "\n\t"
                 output += f"0x{input_bytes[i]:0>2x},"
             output += f"0x{input_bytes[-1]:0>2x}"
-            return output[1:]
+            # Only strip the leading newline if one was added
+            return output.lstrip("\n")
         else:
             for i in range(len(input_bytes) - 1):
                 if i % 15 == 0:
                     output += "\n"
                 output += f"\\x{input_bytes[i]:0>2x}"
             output += f"\\x{input_bytes[-1]:0>2x}"
-            return output[1:]
+            return output.lstrip("\n")
 
     def __output_format(self, arrays: dict, template: str, array_format="unsigned char") -> str:
         """Generate shellcode in specified format."""
