@@ -59,43 +59,60 @@ Shellcrypt currently supports the following output formats (more to come in the 
 # Usage Information
 **Encrypt shellcode with a random key**
 ```bash
-python ./shellcrypt.py -i ./shellcode.bin -f c
+uv run main.py -i ./shellcode.bin -f c
 ```
 **Encrypt shellcode with 128-bit AES CBC**
 ```bash
-python ./shellcrypt.py -i ./shellcode.bin -e aes -f c
+uv run main.py -i ./shellcode.bin -e aes -f c
 ```
 **Encrypt shellcode with XOR and LZNT1 Compression**
 ```bash
-python .\shellcrypt.py -i '.\test\shellcode.bin' -f c -a shellcode -e xor -k 4141 -c lznt
+uv run main.py -i '.\test\shellcode.bin' -f c -a shellcode -e xor -k 4141 -c lznt
 ```
 **Encrypt shellcode with a user-specified key**
 ```bash
-python ./shellcrypt.py -i ./shellcode.bin -f c -k 6d616c77617265
+uv run main.py -i ./shellcode.bin -f c -k 6d616c77617265
 ```
 **Output in nim format with an array name of "shellcode"**
 ```bash
-python ./shellcrypt.py -i ./shellcode.bin -f nim -a shellcode
+uv run main.py -i ./shellcode.bin -f nim -a shellcode
 ```
 **Output to file**
 ```bash
-python ./shellcrypt.py -i ./shellcode.bin -f nim -o ./shellcode_out.nim
+uv run main.py -i ./shellcode.bin -f nim -o ./shellcode_out.nim
+```
+**Obfuscate via Config**
+*config.yaml*
+```yaml
+chain:
+  - type: compress
+    method: lznt
+  - type: encrypt
+    method: aes_cbc
+    key: "41414141414141414141414141414141"
+    nonce: "41414141414141414141414141414141"
+  - type: encode
+    method: base64
+```
+
+```bash
+uv run main.py -i ./shellcode.bin -f c -o config_obfuscation.c
 ```
 **Get a list of compression methods**
 ```bash
-python ./shellcrypt.py --compressors
+uv run main.py --compressors
 ```
 **Get a list of encoding methods**
 ```bash
-python ./shellcrypt.py --encoders
+uv run main.py --encoders
 ```
 **Get a list of encryption methods**
 ```bash
-python ./shellcrypt.py --ciphers
+uv run main.py --ciphers
 ```
 **Get a list of output formats**
 ```bash
-python ./shellcrypt.py --formats
+uv run main.py --formats
 ```
 
 **Help**
@@ -148,7 +165,7 @@ options:
 - [x] More output formats (rust etc.)
 - [x] More encryption methods
 - [x] Compression methods
-- [ ] Create a config system that allows for chaining encryption/encoding/compression methods
+- [x] Create a config system that allows for chaining encryption/encoding/compression methods
 - [ ] Flag to add a decrypt method to the generated code
 - [ ] [Shikata](https://github.com/EgeBalci/sgn) encoder mayhaps?
 

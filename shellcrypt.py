@@ -6,7 +6,6 @@ Shellcrypt: Quality of Life Shellcode Obfuscation Tool
 / - Shellcrypt.py  : Main Program
 /utils/
     - /crypters.py : Encryption, Encoding & Compression Toolkit
-    - /winapi.py   : LZNT1 Compression WinAPI Helper
     - /logging.py  : Logging Helper
 """
 import argparse
