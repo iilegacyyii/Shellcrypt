@@ -294,7 +294,7 @@ class Compress:
         while index < len(data):
             byte = data[index]
             count = 1
-            while index + 1 < len(data) and data[index + 1] == byte:
+            while index + 1 < len(data) and data[index + 1] == byte and count < 255:
                 count += 1
                 index += 1
             compressed.extend([byte, count])
