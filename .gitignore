@@ -9,3 +9,7 @@ env
 dist/
 build/
 .idea/
+logs
+.vscode
+uv.lock
+.python-version

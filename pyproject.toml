@@ -1,0 +1,21 @@
+[project]
+name = "shellcrypt"
+version = "2.0.0"
+description = "A cross-platform quality of life tool to obfuscate a given shellcode file and output in a useful format for pasting directly into your source code."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "argparse==1.4.0",
+    "lznt1==0.2",
+    "markdown-it-py==4.0.0",
+    "mdurl==0.1.2",
+    "pycryptodome==3.23.0",
+    "pyfiglet==1.0.4",
+    "pygments==2.19.2",
+    "rich==14.3.2",
+    "pyyaml==6.0.3",
+]
+
+[tool.setuptools.packages.find]
+include = ["utils", "tests"]
+exclude = ["logs", "assets"]

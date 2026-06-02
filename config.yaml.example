@@ -1,0 +1,12 @@
+# Specify the sequence of operations to apply to shellcode
+# Supported types: encrypt, encode, compress
+
+chain:
+  - type: compress
+    method: lznt
+  - type: encrypt
+    method: xor
+    key: "41414141414141414141414141414141"
+    nonce: "41414141414141414141414141414141"
+  - type: encode
+    method: base64
